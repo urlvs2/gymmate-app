@@ -1,0 +1,159 @@
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: fadeIn 0.35s ease both;
+}
+
+.head {
+  flex: none;
+  padding: 4px 22px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeDown 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.editButton {
+  height: 34px;
+  padding: 0 15px;
+  border-radius: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.editButton:hover {
+  border-color: var(--border-strong);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 22px calc(20px + env(safe-area-inset-bottom));
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  border-radius: 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  animation: fadeUp 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.avatar {
+  width: 58px;
+  height: 58px;
+  flex: none;
+  border-radius: 20px;
+  background: linear-gradient(150deg, var(--accent-hi), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+
+.identityText {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--faint);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rows {
+  margin-top: 14px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  animation: fadeUp 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) 0.07s both;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowLabel {
+  flex: 1;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.rowValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 55%;
+  text-align: end;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowInput {
+  width: 124px;
+  text-align: end;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 9px;
+}
+
+.errorSlot {
+  margin-bottom: 14px;
+}
+
+.footer {
+  margin-top: 14px;
+  animation: fadeUp 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) 0.13s both;
+}

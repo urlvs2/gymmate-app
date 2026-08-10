@@ -1,0 +1,213 @@
+/*
+ * Design tokens straight from the GymMate mockup.
+ *
+ * Everything downstream — components, screens, sheets — reads these variables,
+ * so switching theme or language restyles the whole app without a single
+ * component knowing about colours.
+ */
+
+:root {
+  --font-display: var(--font-sora), system-ui, sans-serif;
+  --font-body: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+:root[data-lang='ar'] {
+  --font-display: var(--font-arabic), system-ui, sans-serif;
+  --font-body: var(--font-arabic), system-ui, sans-serif;
+}
+
+:root,
+:root[data-theme='dark'] {
+  --page: radial-gradient(120% 80% at 50% 0%, #101a2b 0%, #05070c 62%);
+  --bg: #080d16;
+  --surface: #0f1622;
+  --surface2: #16202f;
+  --raised: #1a2536;
+  --border: #1e2a3c;
+  --border-strong: #31405a;
+  --text: #e9eff8;
+  --text2: #c3cede;
+  --muted: #7c8ca4;
+  --faint: #5a6980;
+  --accent: oklch(0.64 0.16 258);
+  --accent-hi: oklch(0.72 0.15 258);
+  --accent-ink: #050a14;
+  --accent-soft: rgba(90, 140, 255, 0.14);
+  --accent-line: rgba(90, 140, 255, 0.28);
+  --card: linear-gradient(160deg, #141e2d, #0d141f);
+  --shadow: 0 40px 100px rgba(0, 0, 0, 0.75);
+  --scrim: rgba(4, 8, 16, 0.6);
+  --danger: #ff8a80;
+  --danger-bg: #2a1215;
+  --danger-border: #5c2b2e;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --page: radial-gradient(120% 80% at 50% 0%, #dde6f5 0%, #f2f5fa 62%);
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --surface2: #eef2f8;
+  --raised: #e7edf6;
+  --border: #dce3ee;
+  --border-strong: #b9c6d9;
+  --text: #0b1524;
+  --text2: #2c3b52;
+  --muted: #5e6e86;
+  --faint: #8494a9;
+  --accent: oklch(0.52 0.16 258);
+  --accent-hi: oklch(0.46 0.17 258);
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(40, 90, 200, 0.1);
+  --accent-line: rgba(40, 90, 200, 0.2);
+  --card: linear-gradient(160deg, #ffffff, #eef3fa);
+  --shadow: 0 40px 90px rgba(20, 40, 80, 0.18);
+  --scrim: rgba(20, 40, 80, 0.35);
+  --danger: #b3261e;
+  --danger-bg: #fdecea;
+  --danger-border: #f4c7c3;
+  color-scheme: light;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font-body);
+  transition:
+    background 0.4s ease,
+    color 0.3s ease;
+}
+
+input,
+button,
+textarea,
+select {
+  font-family: inherit;
+  color: inherit;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Thin scrollbars inside the app frame; the mockup hides them entirely. */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+* {
+  scrollbar-width: none;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheetUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

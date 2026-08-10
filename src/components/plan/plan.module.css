@@ -1,0 +1,232 @@
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: fadeIn 0.35s ease both;
+}
+
+.head {
+  flex: none;
+  padding: 4px 22px 14px;
+  animation: fadeDown 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 22px calc(20px + env(safe-area-inset-bottom));
+}
+
+.summary {
+  border-radius: 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 20px;
+  animation: fadeUp 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.summaryLabel {
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.summaryName {
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.025em;
+  margin-top: 8px;
+}
+
+.summaryWhy {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.day {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: border-color 0.22s ease;
+  animation: fadeUp 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.dayTraining {
+  background: var(--surface);
+}
+
+.dayRest {
+  background: transparent;
+}
+
+.dayOpen {
+  border-color: var(--border-strong);
+}
+
+.dayToday {
+  border-color: var(--accent-line);
+}
+
+.dayButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: none;
+  border: none;
+  padding: 15px 16px;
+  cursor: pointer;
+  text-align: start;
+}
+
+.badge {
+  width: 46px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--surface2);
+  color: var(--faint);
+  border: 1px solid var(--border);
+}
+
+.badgeTraining {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-line);
+}
+
+.dayText {
+  flex: 1;
+  min-width: 0;
+}
+
+.dayFocus {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daySub {
+  display: block;
+  font-size: 12px;
+  color: var(--faint);
+  margin-top: 2px;
+}
+
+.chevron {
+  color: var(--faint);
+  flex: none;
+  transition: transform 0.25s ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+:global([dir='rtl']) .chevron {
+  transform: rotate(180deg);
+}
+
+:global([dir='rtl']) .chevronOpen {
+  transform: rotate(90deg);
+}
+
+.exercises {
+  padding: 0 16px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeUp 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.exercise {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 11px 13px;
+  cursor: pointer;
+  text-align: start;
+  transition: border-color 0.18s ease;
+}
+
+.exercise:hover {
+  border-color: var(--border-strong);
+}
+
+.exerciseName {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exerciseScheme {
+  font-size: 12px;
+  color: var(--faint);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.rebuild {
+  margin-top: 18px;
+}
+
+.rebuildHint {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--faint);
+  margin-top: 8px;
+  text-align: center;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 22px calc(24px + env(safe-area-inset-bottom));
+}
