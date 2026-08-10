@@ -85,6 +85,15 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   return data;
 }
 
+/**
+ * Accounts already greeted in this page load.
+ *
+ * Module scope rather than a ref because React re-mounts providers in
+ * development and a fresh ref would let the coach introduce itself twice —
+ * which showed up as two opening messages and two billed API calls.
+ */
+const greeted = new Set<string>();
+
 const uid = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -113,16 +122,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [buildingPlan, setBuildingPlan] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Which account the loaded snapshot belongs to, so a different user signing in
-  // gets a fresh conversation rather than inheriting the last one's greeting.
-  const loadedForRef = useRef<string | null>(null);
-
   /**
-   * Guards the coach's opening line. A ref rather than state because the chat
-   * screen's effect runs twice under Strict Mode and a state check would not
-   * have updated yet on the second call, greeting the user twice.
+   * Set for the whole of a coach request. Two turns must never overlap: they
+   * would each answer the same question and append a duplicate reply.
    */
-  const openedRef = useRef(false);
+  const coachBusyRef = useRef(false);
 
   const load = useCallback(async () => {
     try {
@@ -130,15 +134,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const data = (await res.json()) as { user: AppUser | null; snapshot: Snapshot | null };
 
       if (data.user && data.snapshot) {
-        if (loadedForRef.current !== data.user.id) {
-          loadedForRef.current = data.user.id;
-          openedRef.current = false;
-        }
         setUser(data.user);
         setSnapshot(data.snapshot);
         setWorkout(loadActiveWorkout(data.user.id));
       } else {
-        loadedForRef.current = null;
         setUser(null);
         setSnapshot(emptySnapshot());
         setWorkout(null);
@@ -178,6 +177,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const runCoachTurn = useCallback(
     async (text: string) => {
+      // Checked and set synchronously, so two callers in the same tick cannot
+      // both get through and post the same turn twice.
+      if (coachBusyRef.current) return false;
+      coachBusyRef.current = true;
+
       setThinking(true);
       setError(null);
       try {
@@ -205,6 +209,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setError(err instanceof Error ? err.message : 'Something went wrong.');
         return false;
       } finally {
+        coachBusyRef.current = false;
         setThinking(false);
       }
     },
@@ -238,8 +243,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   /** Opens the conversation — the coach writes its own greeting and first question. */
   const openCoach = useCallback(async () => {
-    if (openedRef.current || !user || snapshot.chat.length > 0 || thinking) return;
-    openedRef.current = true;
+    if (!user || snapshot.chat.length > 0 || thinking || greeted.has(user.id)) return;
+    greeted.add(user.id);
     const isReady = await runCoachTurn('');
     if (isReady) await buildPlan();
   }, [user, snapshot.chat.length, thinking, runCoachTurn, buildPlan]);
@@ -265,12 +270,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const restartCoach = useCallback(async () => {
-    openedRef.current = true;
+    if (user) greeted.add(user.id);
     setSnapshot((prev) => ({ ...prev, chat: [] }));
     await fetch('/api/chat', { method: 'DELETE' }).catch(() => undefined);
     const isReady = await runCoachTurn('');
     if (isReady) await buildPlan();
-  }, [runCoachTurn, buildPlan]);
+  }, [user, runCoachTurn, buildPlan]);
 
   // --------------------------------------------------------------- workout --
 

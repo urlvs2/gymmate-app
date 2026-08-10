@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, ErrorNote } from '@/components/ui';
+import { Button, Chip, ErrorNote } from '@/components/ui';
 import { usePreferences } from '@/lib/i18n/PreferencesProvider';
 import { useApp } from '@/lib/state/AppProvider';
+import { EMAIL_PATTERN, LIMITS, type Gender } from '@/lib/auth/account';
 import styles from './profile.module.css';
-
-const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 interface EditableFields {
   fullName: string;
@@ -14,6 +13,7 @@ interface EditableFields {
   age: string;
   heightCm: string;
   weightKg: string;
+  gender: string;
 }
 
 /**
@@ -37,6 +37,7 @@ export function ProfileScreen() {
     age: '',
     heightCm: '',
     weightKg: '',
+    gender: '',
   });
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export function ProfileScreen() {
       age: profile.age?.toString() ?? '',
       heightCm: profile.heightCm?.toString() ?? '',
       weightKg: profile.weightKg?.toString() ?? '',
+      gender: profile.gender ?? '',
     });
   }, [profile]);
 
@@ -59,18 +61,25 @@ export function ProfileScreen() {
     .slice(0, 2)
     .join('');
 
-  const numberOrNull = (value: string, min: number, max: number) => {
-    const n = Number(value);
+  const numberOrNull = (value: string, range: { min: number; max: number }) => {
+    const n = Number(value.trim().replace(',', '.'));
     if (!value.trim() || Number.isNaN(n)) return null;
-    return Math.min(max, Math.max(min, n));
+    return Math.min(range.max, Math.max(range.min, n));
+  };
+
+  /** Values outside the allowed ranges are rejected rather than quietly clamped. */
+  const outOfRange = (value: string, range: { min: number; max: number }) => {
+    if (!value.trim()) return false;
+    const n = Number(value.trim().replace(',', '.'));
+    return !Number.isFinite(n) || n < range.min || n > range.max;
   };
 
   const save = async () => {
     const email = draft.email.trim();
-    if (email && !EMAIL_PATTERN.test(email)) {
-      setLocalError(t.emailInvalid);
-      return;
-    }
+    if (email && !EMAIL_PATTERN.test(email)) return setLocalError(t.emailInvalid);
+    if (outOfRange(draft.age, LIMITS.age)) return setLocalError(t.ageRange);
+    if (outOfRange(draft.heightCm, LIMITS.heightCm)) return setLocalError(t.heightRange);
+    if (outOfRange(draft.weightKg, LIMITS.weightKg)) return setLocalError(t.weightRange);
 
     setSaving(true);
     setLocalError(null);
@@ -79,14 +88,18 @@ export function ProfileScreen() {
     const saved = await updateProfile({
       fullName: draft.fullName.trim() || null,
       email: email || null,
-      age: numberOrNull(draft.age, 10, 100),
-      heightCm: numberOrNull(draft.heightCm, 80, 260),
-      weightKg: numberOrNull(draft.weightKg, 25, 400),
+      age: numberOrNull(draft.age, LIMITS.age),
+      heightCm: numberOrNull(draft.heightCm, LIMITS.heightCm),
+      weightKg: numberOrNull(draft.weightKg, LIMITS.weightKg),
+      gender: draft.gender || null,
     });
 
     setSaving(false);
     if (saved) setEditing(false);
   };
+
+  const genderLabel = (value: string | null) =>
+    value === 'female' ? t.female : value === 'male' ? t.male : (value ?? '—');
 
   const editableRows: {
     label: string;
@@ -102,7 +115,6 @@ export function ProfileScreen() {
   ];
 
   const readOnlyRows: { label: string; value: string }[] = [
-    { label: t.rGender, value: profile.gender ?? '—' },
     { label: t.rExperience, value: profile.experience ?? t.notSet },
     { label: t.rGoal, value: profile.goal ?? t.notSet },
     {
@@ -194,6 +206,27 @@ export function ProfileScreen() {
               )}
             </div>
           ))}
+
+          {/* Gender picks from the same two options the sign-up form offers. */}
+          <div className={styles.row}>
+            <span className={styles.rowLabel}>{t.rGender}</span>
+            {editing ? (
+              <span className={styles.genderRow}>
+                {(['female', 'male'] as Gender[]).map((value) => (
+                  <Chip
+                    key={value}
+                    active={draft.gender === value}
+                    className={styles.genderChip}
+                    onClick={() => setDraft({ ...draft, gender: value })}
+                  >
+                    {genderLabel(value)}
+                  </Chip>
+                ))}
+              </span>
+            ) : (
+              <span className={styles.rowValue}>{genderLabel(profile.gender)}</span>
+            )}
+          </div>
 
           {readOnlyRows.map((row) => (
             <div className={styles.row} key={row.label}>

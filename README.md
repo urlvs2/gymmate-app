@@ -129,9 +129,14 @@ including "rest day today, next one Wednesday" (`src/lib/domain/schedule.ts`).
 
 ### Accounts are identified by a username
 
-Sign-up takes a username and a password. An email address is optional and is
-only ever contact information — it is not a login credential and nothing is
-sent to it.
+Sign-up takes a name, username, password, age, height, weight and gender, plus
+an email if the person wants to give one. The email is optional and is only ever
+contact information — it is not a login credential and nothing is sent to it.
+
+Those body facts go straight onto the profile as the account is created, so the
+coach starts the first conversation already knowing them and never asks. The
+interview is only ever about training: experience, goal, days, session length,
+equipment. All of it stays editable in the Profile tab.
 
 Supabase Auth is built around an email address, so every account also carries a
 deterministic internal one, `<username>@users.gymmate.app`, derived from the

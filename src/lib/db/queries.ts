@@ -263,12 +263,19 @@ export async function appendChat(
   messages: Omit<ChatMessage, 'id' | 'createdAt'>[],
 ): Promise<void> {
   if (messages.length === 0) return;
+
+  // Stamped a millisecond apart rather than left to the column default: rows
+  // written in one insert would otherwise share a timestamp, and the read below
+  // orders by it — which showed the coach answering before the user spoke.
+  const base = Date.now();
+
   await db.from('chat_messages').insert(
-    messages.map((m) => ({
+    messages.map((m, i) => ({
       user_id: userId,
       role: m.role,
       content: m.content,
       meta: { options: m.options ?? [], kind: m.kind ?? null },
+      created_at: new Date(base + i).toISOString(),
     })),
   );
 }

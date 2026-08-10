@@ -153,6 +153,18 @@
   margin-bottom: 14px;
 }
 
+.genderRow {
+  display: flex;
+  gap: 8px;
+}
+
+.genderChip {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  border-radius: 10px;
+}
+
 .footer {
   margin-top: 14px;
   animation: fadeUp 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) 0.13s both;

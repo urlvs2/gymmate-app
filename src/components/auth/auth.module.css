@@ -51,6 +51,42 @@
   animation: fadeUp 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) 0.12s both;
 }
 
+/* Sign-up packs more in, so short values sit two to a row. */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 22px;
+  animation: fadeUp 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s both;
+}
+
+.span2 {
+  grid-column: span 2;
+}
+
+.genderBlock {
+  margin-top: 14px;
+  animation: fadeUp 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.16s both;
+}
+
+.genderLabel {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 700;
+  margin-bottom: 9px;
+}
+
+.genderRow {
+  display: flex;
+  gap: 10px;
+}
+
+.genderChip {
+  height: 46px;
+}
+
 .actions {
   margin-top: auto;
   padding-top: 32px;
