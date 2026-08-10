@@ -40,6 +40,9 @@ export interface AppUser {
   email: string | null;
 }
 
+/** What the coach decided to do with the program on a given turn. */
+export type PlanAction = 'none' | 'build' | 'rebuild';
+
 interface AppValue {
   ready: boolean;
   user: AppUser | null;
@@ -56,7 +59,7 @@ interface AppValue {
 
   openCoach: () => Promise<void>;
   sendMessage: (text: string) => Promise<void>;
-  buildPlan: (adjustment?: string) => Promise<void>;
+  buildPlan: (adjustment?: string, rebuild?: boolean) => Promise<void>;
   restartCoach: () => Promise<void>;
 
   startWorkout: (dayIndex: number) => Promise<void>;
@@ -179,7 +182,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     async (text: string) => {
       // Checked and set synchronously, so two callers in the same tick cannot
       // both get through and post the same turn twice.
-      if (coachBusyRef.current) return false;
+      if (coachBusyRef.current) return { action: 'none' as const, note: null };
       coachBusyRef.current = true;
 
       setThinking(true);
@@ -188,7 +191,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const data = await postJson<{
           reply: string;
           options: string[];
-          readyToBuild: boolean;
+          planAction: PlanAction;
+          planNote: string | null;
           profile: Profile;
         }>('/api/ai/coach', { lang, message: text });
 
@@ -204,10 +208,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ],
         }));
 
-        return data.readyToBuild;
+        return { action: data.planAction, note: data.planNote };
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong.');
-        return false;
+        return { action: 'none' as const, note: null };
       } finally {
         coachBusyRef.current = false;
         setThinking(false);
@@ -217,13 +221,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const buildPlan = useCallback(
-    async (adjustment?: string) => {
+    async (adjustment?: string, rebuild = false) => {
       setBuildingPlan(true);
       setError(null);
       try {
         const data = await postJson<{ plan: Plan; profile: Profile }>('/api/ai/plan', {
           lang,
           adjustment: adjustment ?? null,
+          rebuild,
         });
 
         setSnapshot((prev) => ({
@@ -232,6 +237,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           profile: data.profile,
           chat: [...prev.chat, message('assistant', data.plan.rationale, { kind: 'summary' })],
         }));
+
+        // A session in progress belongs to the program that was just replaced —
+        // finishing it would have them doing exercises the coach has withdrawn.
+        if (rebuild) {
+          setWorkout((current) => {
+            if (current) {
+              void postJson('/api/workout', {
+                action: 'abandon',
+                sessionId: current.sessionId,
+              }).catch(() => undefined);
+              clearActiveWorkout();
+            }
+            return null;
+          });
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong.');
       } finally {
@@ -245,8 +265,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const openCoach = useCallback(async () => {
     if (!user || snapshot.chat.length > 0 || thinking || greeted.has(user.id)) return;
     greeted.add(user.id);
-    const isReady = await runCoachTurn('');
-    if (isReady) await buildPlan();
+    const turn = await runCoachTurn('');
+    if (turn.action !== 'none') await buildPlan(turn.note ?? undefined, turn.action === 'rebuild');
   }, [user, snapshot.chat.length, thinking, runCoachTurn, buildPlan]);
 
   const sendMessage = useCallback(
@@ -263,8 +283,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ],
       }));
 
-      const readyToBuild = await runCoachTurn(trimmed);
-      if (readyToBuild) await buildPlan();
+      // The coach decides whether what they just said changes the program.
+      const turn = await runCoachTurn(trimmed);
+      if (turn.action !== 'none') {
+        await buildPlan(turn.note ?? undefined, turn.action === 'rebuild');
+      }
     },
     [thinking, buildingPlan, runCoachTurn, buildPlan],
   );
@@ -273,8 +296,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (user) greeted.add(user.id);
     setSnapshot((prev) => ({ ...prev, chat: [] }));
     await fetch('/api/chat', { method: 'DELETE' }).catch(() => undefined);
-    const isReady = await runCoachTurn('');
-    if (isReady) await buildPlan();
+    const turn = await runCoachTurn('');
+    if (turn.action !== 'none') await buildPlan(turn.note ?? undefined, turn.action === 'rebuild');
   }, [user, runCoachTurn, buildPlan]);
 
   // --------------------------------------------------------------- workout --

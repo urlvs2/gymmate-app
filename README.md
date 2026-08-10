@@ -93,6 +93,27 @@ That means the coach picks its own next question each turn (and skips anything
 it already knows), and a beginner with two days and a pair of dumbbells gets a
 genuinely different program from a lifter with six days in a full gym.
 
+### The coach can change the plan, not just talk about it
+
+One prompt covers the whole conversation — before a program exists it reads as
+an interview, afterwards as an ordinary conversation — and every turn sees the
+profile, the running program and the recent history. That is what lets it
+answer a question without losing its place, and remember what was said twenty
+messages ago.
+
+Each turn also decides what to do with the program: `none`, `build`, or
+`rebuild`. A rebuild fires whenever the ground the program stood on has moved —
+lost access to the gym, fewer days, shorter sessions, a new injury, a changed
+goal — not only when the person asks for one. Say *"I can't go to the gym any
+more"* and the coach updates `equipment` on the profile, rewrites the saved plan
+as bodyweight training, and every later suggestion follows: the plan writer and
+the exercise-swap endpoint both read that same profile, so nothing offers a
+machine again.
+
+A rebuild also ends any session in progress — it belongs to the program that was
+just replaced, and finishing it would mean doing exercises the coach has
+withdrawn. It is marked abandoned, never completed.
+
 `completeJson` validates every response against a Zod schema, feeds validation
 errors back to the model for one repair attempt, retries once through a rate
 limit, and falls through the model list if one is down.

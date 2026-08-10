@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { completeJson } from '@/lib/ai/openrouter';
-import { planSystemPrompt } from '@/lib/ai/prompts';
+import { planSystemPrompt, rebuildInstruction } from '@/lib/ai/prompts';
 import { planSchema } from '@/lib/ai/schemas';
 import { aiPlanToPlan } from '@/lib/ai/mappers';
 import { langSchema, resolveContext } from '@/lib/api/context';
@@ -13,8 +13,10 @@ export const maxDuration = 120;
 
 const bodySchema = z.object({
   lang: langSchema,
-  /** Free-text steer from the user, e.g. "rebuild it around 4 days". */
+  /** What changed, when the coach asked for the program to be rewritten. */
   adjustment: z.string().max(500).nullish(),
+  /** True when this replaces a program the person already had. */
+  rebuild: z.boolean().default(false),
 });
 
 /**
@@ -32,9 +34,11 @@ export async function POST(request: Request) {
       messages: [
         {
           role: 'user',
-          content: body.adjustment?.trim()
-            ? `Build my program. Also take this into account: ${body.adjustment.trim()}`
-            : 'Build my program now.',
+          content: body.rebuild
+            ? rebuildInstruction(body.adjustment ?? null, ctx.lang)
+            : body.adjustment?.trim()
+              ? `Build my program. Also take this into account: ${body.adjustment.trim()}`
+              : 'Build my program now.',
         },
       ],
       schema: planSchema,

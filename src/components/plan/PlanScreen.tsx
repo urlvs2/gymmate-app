@@ -117,7 +117,7 @@ export function PlanScreen({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
             variant="secondary"
             size="md"
             loading={buildingPlan}
-            onClick={() => void buildPlan()}
+            onClick={() => void buildPlan(undefined, true)}
           >
             {t.rebuildPlan}
           </Button>

@@ -37,13 +37,23 @@ export const profileUpdatesSchema = z.object({
 
 export type ProfileUpdates = z.infer<typeof profileUpdatesSchema>;
 
+/**
+ * What the coach decides to do with the program this turn.
+ *
+ * `build` writes the first one, `rebuild` replaces an existing one because
+ * something the program was built on has changed — different equipment, fewer
+ * days, a new injury. `none` is an ordinary reply.
+ */
+export const planActionSchema = z.enum(['none', 'build', 'rebuild']).default('none');
+
 export const coachTurnSchema = z.object({
   /** What the coach says next, in the user's language. */
-  reply: trimmed(700),
+  reply: trimmed(900),
   /** One-tap answers for the question just asked. Empty when free text fits better. */
   options: z.array(trimmed(60)).max(6).default([]),
-  /** True once the coach has everything it needs to write the program. */
-  ready_to_build: z.boolean().default(false),
+  plan_action: planActionSchema,
+  /** What the plan writer must take into account, when the plan is being changed. */
+  plan_note: trimmed(400).nullish(),
   /** Facts learned from the user's last message. */
   profile_updates: profileUpdatesSchema.default({}),
 });
@@ -111,8 +121,4 @@ export const explanationSchema = z.object({
 export const swapSchema = z.object({
   exercise: planExerciseSchema,
   reason: trimmed(400),
-});
-
-export const freeReplySchema = z.object({
-  reply: trimmed(900),
 });
