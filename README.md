@@ -1,5 +1,8 @@
 # GymMate
 
+**Live: https://gymmate-app.vercel.app**
+
+
 An AI gym coach for people who have never trained. It interviews the user, writes
 them a program, then walks them through every session one exercise at a time —
 explaining movements, swapping them when a machine is busy, and learning what
@@ -159,6 +162,25 @@ exist. The OpenRouter key lives only on the server — the AI modules are marked
 shipping the key.
 
 ---
+
+## Deploying
+
+The app runs on Vercel, deployed from `main`. The environment variables above
+have to exist on the project as well as locally:
+
+```bash
+bash scripts/vercel-env.sh
+```
+
+That copies each value out of `.env.local` into the linked Vercel project for
+production, preview and development, reading them from the file so no secret
+ends up in a command line. `OPENROUTER_SITE_URL` should point at the deployed
+domain rather than localhost.
+
+One gotcha worth knowing: Vercel builds a vulnerable Next.js release and then
+refuses to deploy the output. If a deployment fails with *"Vulnerable version
+of Next.js detected"* after a clean build, the fix is to upgrade Next, not to
+change the app.
 
 ## Scripts
 
