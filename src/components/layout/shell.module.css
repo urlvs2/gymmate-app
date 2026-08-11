@@ -1,7 +1,11 @@
 /*
- * Mobile first: the app fills the viewport on a phone. From tablet width up it
- * settles into the device frame the mockup was drawn in, centred on the page
- * gradient.
+ * Two layouts from one markup.
+ *
+ * Phones (< 768px) get the full-bleed phone app exactly as before: a status bar
+ * on top, the active screen filling the middle, the tab bar pinned to the
+ * bottom. From tablet width up the phone shell is dropped for a real desktop
+ * layout — a left sidebar of tabs beside a wide content area — so the screen
+ * width is actually used instead of a small phone floating in empty space.
  */
 
 .page {
@@ -24,21 +28,6 @@
   transition:
     background 0.35s ease,
     border-color 0.35s ease;
-}
-
-@media (min-width: 560px) and (min-height: 720px) {
-  .page {
-    padding: 24px;
-  }
-
-  .frame {
-    width: 390px;
-    height: 844px;
-    max-height: calc(100dvh - 48px);
-    border: 1px solid var(--border);
-    border-radius: 44px;
-    box-shadow: var(--shadow);
-  }
 }
 
 /* Status bar -------------------------------------------------------------- */
@@ -102,6 +91,16 @@
   position: relative;
 }
 
+/* Wraps the active screen so it can fill (and, on desktop, sit beside the
+   sidebar) without the screens needing to know about the layout around them. */
+.main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .scroll {
   flex: 1;
   min-height: 0;
@@ -135,7 +134,7 @@
   letter-spacing: -0.02em;
 }
 
-/* Bottom navigation ------------------------------------------------------- */
+/* Bottom navigation (phone) / sidebar (desktop) --------------------------- */
 
 .nav {
   flex: none;
@@ -148,10 +147,9 @@
   border-top: 1px solid var(--border);
 }
 
-@media (min-width: 560px) and (min-height: 720px) {
-  .nav {
-    padding-bottom: 26px;
-  }
+/* The brand only appears in the desktop sidebar. */
+.navBrand {
+  display: none;
 }
 
 .navItem {
@@ -193,4 +191,74 @@
   align-items: center;
   justify-content: center;
   color: var(--faint);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Desktop / tablet: drop the phone shell for a sidebar + content layout.    */
+/* ------------------------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  .page {
+    align-items: stretch;
+  }
+
+  .frame {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 100dvh;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* A slim top bar: the fake phone clock goes away, the toggles stay. */
+  .statusBar {
+    height: 58px;
+    align-items: center;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .clock {
+    display: none;
+  }
+
+  .body {
+    flex-direction: row;
+  }
+
+  /* The tab bar becomes a left sidebar (right in RTL, via flex order). */
+  .nav {
+    order: -1;
+    flex: none;
+    width: 236px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    grid-template-columns: none;
+    padding: 20px 16px;
+    border-top: none;
+    border-inline-end: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .navBrand {
+    display: flex;
+    padding: 6px 10px 20px;
+  }
+
+  .navItem {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 13px;
+    padding: 12px 14px;
+    border-radius: 13px;
+  }
+
+  .navLabel {
+    font-size: 14.5px;
+    font-weight: 600;
+  }
 }

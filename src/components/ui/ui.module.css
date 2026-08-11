@@ -344,3 +344,25 @@
   line-height: 1;
   padding: 0 2px;
 }
+
+/* Desktop / tablet: bottom sheets become centred modals over the whole page. */
+@media (min-width: 768px) {
+  .scrim {
+    position: fixed;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .sheet {
+    max-width: 560px;
+    max-height: 86vh;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    animation: popIn 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .grabber {
+    display: none;
+  }
+}

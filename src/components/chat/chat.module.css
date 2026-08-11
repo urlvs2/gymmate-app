@@ -285,3 +285,28 @@
 .errorSlot {
   padding-bottom: 10px;
 }
+
+/* Desktop / tablet: a centred conversation column, full-width header. */
+@media (min-width: 768px) {
+  .header {
+    padding: 12px 28px 16px;
+  }
+
+  .thread {
+    width: 100%;
+    max-width: 840px;
+    margin-inline: auto;
+    padding: 26px 28px 14px;
+  }
+
+  .composer {
+    width: 100%;
+    max-width: 840px;
+    margin-inline: auto;
+    padding: 0 28px 20px;
+  }
+
+  .bubble {
+    max-width: 560px;
+  }
+}

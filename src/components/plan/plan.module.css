@@ -230,3 +230,34 @@
   justify-content: center;
   padding: 8px 22px calc(24px + env(safe-area-inset-bottom));
 }
+
+/* Desktop / tablet: use the width — the week lays out two days across. */
+@media (min-width: 768px) {
+  .head {
+    width: 100%;
+    max-width: 1040px;
+    margin-inline: auto;
+    padding: 18px 28px 16px;
+  }
+
+  .body {
+    width: 100%;
+    max-width: 1040px;
+    margin-inline: auto;
+    padding: 0 28px 32px;
+  }
+
+  .days {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+
+  .empty {
+    width: 100%;
+    max-width: 1040px;
+    margin-inline: auto;
+    padding: 8px 28px 32px;
+  }
+}

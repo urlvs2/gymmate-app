@@ -29,10 +29,12 @@ export function AppTabs() {
 
   return (
     <div className={styles.body}>
-      {tab === 'bot' && <ChatScreen onNavigate={setTab} />}
-      {tab === 'workout' && <WorkoutScreen onNavigate={setTab} />}
-      {tab === 'plan' && <PlanScreen onNavigate={setTab} />}
-      {tab === 'profile' && <ProfileScreen />}
+      <div className={styles.main}>
+        {tab === 'bot' && <ChatScreen onNavigate={setTab} />}
+        {tab === 'workout' && <WorkoutScreen onNavigate={setTab} />}
+        {tab === 'plan' && <PlanScreen onNavigate={setTab} />}
+        {tab === 'profile' && <ProfileScreen />}
+      </div>
       <BottomNav tab={tab} onChange={setTab} />
     </div>
   );

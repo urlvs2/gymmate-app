@@ -535,3 +535,26 @@
   color: var(--faint);
   margin-top: 4px;
 }
+
+/* Desktop / tablet: centre the single-exercise flow in a focused column. */
+@media (min-width: 768px) {
+  .head,
+  .body,
+  .state {
+    width: 100%;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .head {
+    padding: 18px 28px 12px;
+  }
+
+  .body {
+    padding: 12px 28px 32px;
+  }
+
+  .state {
+    padding: 8px 28px 32px;
+  }
+}

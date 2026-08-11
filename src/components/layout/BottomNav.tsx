@@ -2,6 +2,7 @@
 
 import { usePreferences } from '@/lib/i18n/PreferencesProvider';
 import { CalendarIcon, ProfileIcon, SparkIcon, WorkoutIcon } from '@/components/ui/Icons';
+import { Brand } from './AppFrame';
 import styles from './shell.module.css';
 
 export type Tab = 'profile' | 'bot' | 'workout' | 'plan';
@@ -20,6 +21,9 @@ export function BottomNav({ tab, onChange }: { tab: Tab; onChange: (tab: Tab) =>
 
   return (
     <nav className={styles.nav}>
+      <div className={styles.navBrand}>
+        <Brand name={t.appName} />
+      </div>
       {items.map((item) => (
         <button
           key={item.key}
