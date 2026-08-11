@@ -1,15 +1,36 @@
 import type { AiPlan, ProfileUpdates } from './schemas';
 import type { Plan, PlanDay, PlanExercise, Profile, Weekday } from '@/lib/domain/types';
 
+type AiExercise = AiPlan['schedule'][number]['exercises'][number];
+
+/**
+ * How a chosen exercise's real identity — equipment, demonstration photos and
+ * catalogue id — is looked up from its reference code. Supplied by the route,
+ * which holds the pool the model chose from.
+ */
+export interface ExerciseResolver {
+  (ex: AiExercise): {
+    equipment: string;
+    imageStart?: string;
+    imageEnd?: string;
+    catalogueId?: string;
+  };
+}
+
 /** Turn the model's snake_case JSON into the app's plan shape. */
-export function aiPlanToPlan(ai: AiPlan, id: string, createdAt = new Date().toISOString()): Plan {
+export function aiPlanToPlan(
+  ai: AiPlan,
+  id: string,
+  resolve: ExerciseResolver,
+  createdAt = new Date().toISOString(),
+): Plan {
   const schedule: PlanDay[] = [...ai.schedule]
     .sort((a, b) => a.weekday - b.weekday)
     .map((day) => ({
       weekday: day.weekday as Weekday,
       rest: day.rest,
       focus: day.focus,
-      exercises: day.rest ? [] : day.exercises.map(toExercise),
+      exercises: day.rest ? [] : day.exercises.map((ex) => toExercise(ex, resolve)),
     }));
 
   return {
@@ -23,16 +44,20 @@ export function aiPlanToPlan(ai: AiPlan, id: string, createdAt = new Date().toIS
   };
 }
 
-function toExercise(ex: AiPlan['schedule'][number]['exercises'][number]): PlanExercise {
+function toExercise(ex: AiExercise, resolve: ExerciseResolver): PlanExercise {
+  const real = resolve(ex);
   return {
     name: ex.name,
     muscle: ex.muscle,
-    equipment: ex.equipment,
+    equipment: real.equipment,
     sets: ex.sets,
     reps: ex.reps,
     restSeconds: ex.rest_seconds,
     howTo: ex.how_to,
     note: ex.note ?? undefined,
+    catalogueId: real.catalogueId,
+    imageStart: real.imageStart,
+    imageEnd: real.imageEnd,
   };
 }
 

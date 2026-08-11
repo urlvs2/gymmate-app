@@ -61,9 +61,10 @@ export const coachTurnSchema = z.object({
 export type CoachTurn = z.infer<typeof coachTurnSchema>;
 
 export const planExerciseSchema = z.object({
+  /** The reference code of the real catalogue exercise the model chose. */
+  ref: trimmed(12),
   name: trimmed(80),
   muscle: trimmed(60),
-  equipment: trimmed(60),
   sets: looseNumber.pipe(z.number().int().min(1).max(10)),
   reps: z.union([z.number(), z.string()]).transform((v) => String(v).trim().slice(0, 24)),
   rest_seconds: looseNumber.pipe(z.number().int().min(15).max(400)),

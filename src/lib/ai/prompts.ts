@@ -105,30 +105,36 @@ Reply with a JSON object only, no prose around it:
 }
 
 /** Program generation. */
-export function planSystemPrompt(profile: Profile, lang: Lang): string {
+export function planSystemPrompt(profile: Profile, pool: string, lang: Lang): string {
   return `You are GymMate's coach, writing a complete weekly training program for one specific person.
 
 ${describeProfile(profile)}
 
-HOW TO BUILD IT
-Design the week around this person. Decide the structure yourself — how their training days are arranged, what each day covers, which exercises, how many sets, what rep range and how much rest. There is no house template and no approved exercise list: a beginner with two days and a pair of dumbbells and an experienced lifter with six days in a full gym should get genuinely different programs.
+EXERCISES YOU MAY USE
+You do not invent exercises. Below is the list of real exercises available to this person — already filtered to their equipment and their level. Build the entire program by choosing from this list and nothing else. Each line is "code: Name (equipment, mechanic)". To put an exercise in the plan, set its "ref" to that code.
 
-Rules that do matter:
+${pool}
+
+HOW TO BUILD IT
+Design the week around this person: decide how their training days are arranged, what each day covers, which of the exercises above to use, how many sets, what rep range and how much rest. A beginner with two days and a lifter with six days should get genuinely different programs — but every exercise must come from the list.
+
+Rules that matter:
+- Every exercise's "ref" MUST be one of the codes above. Never use a code that is not listed, and never write in an exercise that is not on the list. If you cannot find a perfect fit, choose the closest real one from the list.
+- Match the choices to their goal: for building muscle or strength, lean on the compound movements; add isolation work to round it out. Do not pick an exercise that does not suit what they asked for.
 - Return all seven weekdays, 0 = Monday through 6 = Sunday, each exactly once and in order. Days they do not train are rest days with an empty exercise list and a focus word meaning rest.
 - The number of non-rest days must equal their stated days per week, and rest days should be spread sensibly rather than bunched at the end.
-- Every session must realistically fit their session length once you count sets and rest. Fewer, better exercises beat a list they cannot finish.
-- EQUIPMENT IS A STRICT RULE, NOT A PREFERENCE. Their answer to what equipment they have is the complete list of what they can use — treat it as an allow-list. Every single exercise must be doable with only that equipment, and the "equipment" field of each exercise must name only something on their list (or bodyweight). If they said dumbbells only, every exercise uses a dumbbell or nothing but their body — no barbell, machine, cable, kettlebell or band anywhere. If they said bodyweight or no equipment, use only their own body (a wall, the floor, a sturdy chair or step are fine) and nothing that must be bought. If they have a full gym, anything goes. When a movement you would normally pick needs gear they do not have, replace it with one that trains the same thing using only what they have. Before you finish, re-read every exercise and remove any that would need equipment they did not list.
-- The less experience they have, the simpler and more stable the movements should be, and the more the cues matter.
-- "how_to" is 2 to 4 short cues in plain language, written for someone doing the movement for the first time. Say what to do, not anatomy.
+- Every session must realistically fit their session length once you count sets and rest. Fewer, better exercises beat a list they cannot finish. Do not repeat the same exercise within one session.
+- "name" is the display name of the exercise you chose — use the real name from the list (translate it into the user's language if it is not English). "muscle" is the main muscle it trains, in the user's language.
+- "how_to" is 2 to 4 short cues in plain language for someone doing the movement for the first time. Say what to do, not anatomy.
 - Never include weights or loads anywhere. The app tracks what the person actually lifts and takes it from there.
 - "focus" is a couple of words a beginner understands (e.g. the muscles trained that day).
-- "name" describes the PROGRAM, not the person — something like "3-Day Full Body Start" or "Upper / Lower Build". Never use a human name.
+- The program "name" describes the PROGRAM, not the person — like "3-Day Full Body Start". Never use a human name.
 - "rationale" explains in 2-3 sentences why this shape of week suits them, referring to their own answers.
 
 ${LANGUAGE_RULE(lang)}
 
 Reply with a JSON object only, no prose around it:
-{"name": string, "rationale": string, "days_per_week": number, "session_minutes": number, "schedule": [{"weekday": number, "rest": boolean, "focus": string, "exercises": [{"name": string, "muscle": string, "equipment": string, "sets": number, "reps": string, "rest_seconds": number, "how_to": string[], "note"?: string}]}]}`;
+{"name": string, "rationale": string, "days_per_week": number, "session_minutes": number, "schedule": [{"weekday": number, "rest": boolean, "focus": string, "exercises": [{"ref": string, "name": string, "muscle": string, "sets": number, "reps": string, "rest_seconds": number, "how_to": string[], "note"?: string}]}]}`;
 }
 
 export interface ExerciseContext {
@@ -161,21 +167,27 @@ export function swapSystemPrompt(
   profile: Profile,
   lang: Lang,
   reason: string | null,
+  pool: string,
 ): string {
   return `You are GymMate's coach replacing one exercise in today's session.
 
-Exercise to replace: ${ctx.exercise.name} (${ctx.exercise.muscle}, ${ctx.exercise.equipment}), ${ctx.exercise.sets} sets of ${ctx.exercise.reps}, ${ctx.exercise.restSeconds}s rest.
+Exercise to replace: ${ctx.exercise.name} (${ctx.exercise.muscle}), ${ctx.exercise.sets} sets of ${ctx.exercise.reps}, ${ctx.exercise.restSeconds}s rest.
 ${reason ? `Why they want it swapped: ${reason}` : 'They did not say why — assume the equipment is busy or unavailable.'}
 ${describeProfile(profile)}
 
-Pick a replacement that trains the same thing and keeps the session the same length. Their equipment is a strict rule: the replacement must be doable with only the equipment they listed above, and its "equipment" field must name only something they have (or bodyweight) — never suggest a machine, cable, barbell or anything else they did not say they have. Do not repeat the exercise you are replacing. Adjust sets, reps and rest if the new movement needs it. Never mention weights — the app handles those from the person's own history.
+REAL EXERCISES YOU MAY CHOOSE FROM
+Pick the replacement from this list only — do not invent one. It is already filtered to their equipment and level. Each line is "code: Name (equipment, mechanic)".
+
+${pool}
+
+Choose the exercise from the list that best trains the same muscle as the one being replaced, and set its "ref" to that code. Do not pick the same exercise you are replacing. Keep the session the same length — adjust sets, reps and rest if the new movement needs it. "name" is the chosen exercise's real name in the user's language; "muscle" is the main muscle it trains. Never mention weights — the app handles those from the person's own history.
 
 "reason" is one or two sentences telling them what changed and why it still works.
 
 ${LANGUAGE_RULE(lang)}
 
 Reply with a JSON object only:
-{"exercise": {"name": string, "muscle": string, "equipment": string, "sets": number, "reps": string, "rest_seconds": number, "how_to": string[], "note"?: string}, "reason": string}`;
+{"exercise": {"ref": string, "name": string, "muscle": string, "sets": number, "reps": string, "rest_seconds": number, "how_to": string[], "note"?: string}, "reason": string}`;
 }
 
 /**

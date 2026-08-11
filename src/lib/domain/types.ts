@@ -42,6 +42,8 @@ export interface PlanExercise {
   /** Short numbered coaching cues shown in the exercise sheet. */
   howTo: string[];
   note?: string;
+  /** The free-exercise-db id this exercise was selected from, when it came from the catalogue. */
+  catalogueId?: string;
   /**
    * A real demonstration photo of the movement, matched from an open exercise
    * library. Two frames — the start and mid-rep positions — so the UI can

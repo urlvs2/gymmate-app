@@ -14,7 +14,9 @@ import libraryData from './library.json';
  */
 
 interface LibEntry {
+  id: string; // stable catalogue id, e.g. "Barbell_Bench_Press_-_Medium_Grip"
   n: string; // name
+  l: string; // level: beginner | intermediate | expert
   i: string[]; // image paths, e.g. ["Barbell_Bench_Press/0.jpg", ".../1.jpg"]
   m: string[]; // primary muscles
   e: string | null; // equipment

@@ -82,31 +82,51 @@ src/
 
 ### The AI is the product
 
-Nothing about the training is hardcoded. There is no list of questions, no
-catalogue of exercises, no set of allowed splits anywhere in the codebase —
-`src/lib/ai/prompts.ts` describes the coach's *job* and `src/lib/ai/schemas.ts`
-describes the *shape* of a valid answer. Everything else is the model's call,
-made from the user's age, gender, height, weight, experience, goal, available
-days, session length and equipment.
+Almost nothing about the training is hardcoded. There is no list of questions
+and no set of allowed splits — `src/lib/ai/prompts.ts` describes the coach's
+*job* and `src/lib/ai/schemas.ts` describes the *shape* of a valid answer. The
+structure of the week, the choice of movements, the sets, reps and rest are the
+model's call, made from the user's age, gender, height, weight, experience,
+goal, available days, session length and equipment.
 
 That means the coach picks its own next question each turn (and skips anything
 it already knows), and a beginner with two days and a pair of dumbbells gets a
 genuinely different program from a lifter with six days in a full gym.
 
+### Real exercises, not invented ones
+
+The one thing the model does *not* invent is the exercises themselves. Every
+movement is chosen from the open
+[free-exercise-db](https://github.com/yuhonas/free-exercise-db) (873 real
+exercises). For each plan, `src/lib/exercises/catalogue.ts` builds a shortlist
+filtered to the person's **equipment** (a dumbbells-only user's pool contains
+only dumbbell and bodyweight movements) and their **level** (a beginner never
+sees expert lifts like a pistol squat or planche push-up — the exact
+"unrealistic" cases this rules out). That shortlist goes into the prompt, and
+the model selects from it by reference code; a code that is not on the list
+fails schema validation and is sent back for one repair pass. So an invented or
+unsuitable exercise cannot reach the plan — it is not in the list, and a made-up
+code is rejected.
+
+Because each chosen exercise is a real catalogue entry, its equipment tag, its
+demonstration photos and its identity all come straight from the database — so
+equipment compliance and correct images are now guaranteed by construction
+rather than checked after the fact. Swaps pick from the same shortlist. Only the
+display name, the muscle label and the coaching cues are the model's own words,
+so an Arabic plan still reads in Arabic while pointing at the real movement
+underneath.
+
 ### Equipment is a hard rule, not a hint
 
-Whatever the user says they have is the complete list of what a plan may use. The
-plan prompt states this as an allow-list and asks the model to re-read the plan
-and drop anything needing gear the person did not list, but a prompt alone is not
-a guarantee — so it is also enforced. `src/lib/domain/equipment.ts` reads the
-free-text answer (in either language) into a policy: a clearly restrictive answer
-like "just dumbbells at home" or "bodyweight only" produces a rule, while "basic
-gym" or "full gym" allows everything, because the person genuinely has it. The
-plan and swap routes fold that rule into the Zod schema, so a program that slips a
-cable machine into a dumbbell-only plan fails validation and `completeJson` feeds
-the offending exercises back for one repair pass. Detection is deliberately
-precise (word-boundary matching, English and Arabic) so it only ever rejects a
-real violation, never a valid plan.
+Whatever the user says they have is the complete list of what a plan may use, and
+that is now guaranteed at the source: `src/lib/domain/equipment.ts` reads the
+free-text answer (in either language) into a policy — "just dumbbells at home" and
+"bodyweight only" produce a restriction; "basic gym" or "full gym" allows
+everything — and the catalogue shortlist for the plan is filtered by that policy
+before the model ever sees it. A dumbbells-only user's pool simply contains no
+machine or cable movements, so the model cannot pick one. The equipment policy is
+also still available as a schema check for belt-and-braces, but with the pool
+pre-filtered a violation cannot occur in the first place.
 
 ### The coach can change the plan, not just talk about it
 
