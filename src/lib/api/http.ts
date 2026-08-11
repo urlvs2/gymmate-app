@@ -19,6 +19,10 @@ export function handleError(err: unknown) {
 
   if (err instanceof AiError) {
     console.error('[ai]', err.message);
+    // A 402 means OpenRouter refused the request for lack of credits — on a
+    // free-tier key the big plan request exceeds what the balance can afford.
+    // Retrying will not help, so say so plainly instead of "try again".
+    const outOfCredit = err.status === 402 || /credit|afford/i.test(err.message);
     const friendly =
       err.status === 503
         ? 'The AI is not configured yet — add OPENROUTER_API_KEY to .env.local.'
@@ -26,7 +30,9 @@ export function handleError(err: unknown) {
           ? 'OpenRouter rejected the API key. Check OPENROUTER_API_KEY in .env.local.'
           : err.status === 429
             ? 'The AI is rate limited right now. Give it a few seconds and try again.'
-            : 'The coach could not answer just now. Try again in a moment.';
+            : outOfCredit
+              ? 'The AI ran out of OpenRouter credits, so it cannot build the plan. Add a little credit at openrouter.ai, then try again.'
+              : 'The coach could not answer just now. Try again in a moment.';
     return NextResponse.json({ error: friendly }, { status: err.status === 503 ? 503 : 502 });
   }
 

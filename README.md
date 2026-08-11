@@ -155,16 +155,20 @@ limit, and falls through the model list if one is down.
 
 Two settings matter for how the app feels:
 
-- **The model is OpenAI's GPT-5.6 (`openai/gpt-5.6-luna`),** driving both the
-  conversation and the program. It reads context well, answers questions mid-flow
-  before returning to its own, and writes plans that actually reflect what the
-  person said — a nervous beginner who mentions getting winded on stairs gets
-  warm-up walks and gentle regressions, not a generic template. It is the newest
-  OpenAI generation the current free-tier key can run end to end: the larger
-  flagships (`gpt-5.4` / `5.5` / `5.6-sol`) answer a short chat turn fine but
-  `402` once a whole program's worth of output is requested. Add credits at
-  openrouter.ai and you can promote both variables to `openai/gpt-5.4` for even
-  richer plans; the fallback in each chain is `openai/gpt-oss-120b:free`.
+- **The preferred model is OpenAI's GPT-5.6 (`openai/gpt-5.6-luna`),** driving
+  both the conversation and the program. It reads context well, answers questions
+  mid-flow before returning to its own, and writes plans that reflect what the
+  person said rather than a generic template.
+
+  There is a catch on a **free-tier key with no credits**: OpenRouter caps how
+  many tokens a single request may use by what your balance can afford. A short
+  chat turn (≈900 tokens) fits, so the conversation works; the whole-program
+  request (≈4500 tokens) does not, so `luna` returns `402` and the plan step
+  shows *"the AI ran out of credits"*. The fix is the fallback chain: cheaper
+  models follow `luna` that cost ~10× less per token — so the same balance buys
+  them the tokens the plan needs — and they build the plan in a handful of
+  seconds. Add a few dollars of credit at openrouter.ai and `luna` serves
+  everything itself (and you can promote the chain to `gpt-5.4` for richer plans).
 - **Reasoning is switched off.** The coach's replies are short and structured,
   and reasoning made one model take 30 seconds instead of two. Models that
   refuse to have it disabled are retried with it left on.
