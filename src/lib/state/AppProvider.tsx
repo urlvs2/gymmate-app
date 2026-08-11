@@ -176,6 +176,54 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (workout) saveActiveWorkout(workout);
   }, [workout]);
 
+  /**
+   * Fills in exercise demonstration photos.
+   *
+   * The plan comes back from generation without images; the server matches them
+   * (and normalizes non-English names) on demand. We ask once per plan — guarded
+   * by id so a plan with a few genuinely unmatchable exercises is not retried
+   * forever — and merge the result into both the plan and any workout already in
+   * progress for it.
+   */
+  const imagesRequestedRef = useRef<string | null>(null);
+  useEffect(() => {
+    const plan = snapshot.plan;
+    if (!plan) return;
+    const needs = plan.schedule.some((d) => !d.rest && d.exercises.some((e) => !e.imageStart));
+    if (!needs || imagesRequestedRef.current === plan.id) return;
+    imagesRequestedRef.current = plan.id;
+
+    void (async () => {
+      try {
+        const data = await postJson<{ plan: Plan | null }>('/api/plan/images', { lang });
+        const filled = data.plan;
+        if (!filled) return;
+
+        setSnapshot((prev) =>
+          prev.plan && prev.plan.id === filled.id ? { ...prev, plan: filled } : prev,
+        );
+
+        // A session already underway holds its own copy of the exercises; give
+        // those the images too, matched by name.
+        setWorkout((current) => {
+          if (!current) return current;
+          const day = filled.schedule[current.dayIndex];
+          if (!day || day.rest) return current;
+          const byName = new Map(day.exercises.map((e) => [e.name, e]));
+          const exercises = current.exercises.map((e) => {
+            const match = byName.get(e.name);
+            return match?.imageStart
+              ? { ...e, imageStart: match.imageStart, imageEnd: match.imageEnd }
+              : e;
+          });
+          return { ...current, exercises };
+        });
+      } catch {
+        // Leave illustrations in place; a reload will try again.
+      }
+    })();
+  }, [snapshot.plan, lang]);
+
   // ----------------------------------------------------------------- coach --
 
   const runCoachTurn = useCallback(

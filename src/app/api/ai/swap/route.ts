@@ -3,6 +3,7 @@ import { completeJson } from '@/lib/ai/openrouter';
 import { swapSystemPrompt } from '@/lib/ai/prompts';
 import { swapSchema } from '@/lib/ai/schemas';
 import { aiExerciseToExercise } from '@/lib/ai/mappers';
+import { attachImagesToExercises } from '@/lib/exercises/attach';
 import { langSchema, resolveContext } from '@/lib/api/context';
 import { fail, handleError, ok } from '@/lib/api/http';
 
@@ -44,10 +45,11 @@ export async function POST(request: Request) {
       maxTokens: 900,
     });
 
-    return ok({
-      exercise: aiExerciseToExercise(result.exercise),
-      reason: result.reason,
-    });
+    // Give the replacement a demonstration photo too, so a swapped exercise is
+    // never the odd one out with a bare illustration.
+    const [exercise] = await attachImagesToExercises([aiExerciseToExercise(result.exercise)]);
+
+    return ok({ exercise, reason: result.reason });
   } catch (err) {
     if (err instanceof z.ZodError) return fail('Invalid request.', 400);
     return handleError(err);

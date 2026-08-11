@@ -146,6 +146,28 @@ light enough to keep every rep clean. From then on the suggestion comes from
 their own log — what they lifted and whether it felt too easy, good or too hard
 (`src/lib/domain/progression.ts`).
 
+### Every exercise shows a real demonstration
+
+The exercise sheet shows an actual photo of the movement — two frames, the start
+and mid-rep positions, cross-faded so the rep animates — drawn from the open
+[free-exercise-db](https://github.com/yuhonas/free-exercise-db) (873 movements,
+served from a CDN, no API key).
+
+The hard part is that exercise names are the model's own words, in the user's
+language. Matching happens in `src/lib/exercises/`: a slim library index
+(`library.json`) plus an IDF-weighted fuzzy matcher (`match.ts`) where rare words
+like "goblet" or "thruster" count for far more than "dumbbell", the naming verb
+must agree (a *row* is never matched to a *press*), and anything below a
+confidence bar returns nothing rather than risk showing the wrong exercise.
+Non-English names are normalized to their common English name in one batched
+model call first (`attach.ts`) — "ضغط الصدر بالدمبلز" becomes "Dumbbell Bench
+Press", which matches. Images are attached once per plan through
+`/api/plan/images` and stored on the plan, and swapped-in exercises get one too.
+
+When a movement genuinely is not in the library — a warm-up walk, a bird-dog —
+the panel falls back to a silhouette of the right *pattern* (a squat looks like a
+squat, a plank like a plank), never the generic standing figure that started this.
+
 ### Missed workouts stay missed
 
 A `workout_sessions` row is created when the user starts a session and only

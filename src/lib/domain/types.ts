@@ -42,6 +42,14 @@ export interface PlanExercise {
   /** Short numbered coaching cues shown in the exercise sheet. */
   howTo: string[];
   note?: string;
+  /**
+   * A real demonstration photo of the movement, matched from an open exercise
+   * library. Two frames — the start and mid-rep positions — so the UI can
+   * animate them. Absent when no confident match was found; the UI then draws a
+   * movement-appropriate illustration instead.
+   */
+  imageStart?: string;
+  imageEnd?: string;
 }
 
 export interface PlanDay {

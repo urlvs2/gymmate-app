@@ -4,7 +4,7 @@ import { Button, Sheet, StatGrid } from '@/components/ui';
 import { usePreferences } from '@/lib/i18n/PreferencesProvider';
 import { restLabel, schemeLabel } from '@/lib/domain/exercise';
 import type { PlanExercise } from '@/lib/domain/types';
-import { ExerciseArt } from './ExerciseArt';
+import { ExerciseImage } from './ExerciseImage';
 import styles from './workout.module.css';
 
 /** Full details for one exercise: artwork, scheme, equipment and the AI's cues. */
@@ -20,7 +20,13 @@ export function ExerciseDetailSheet({
 
   return (
     <Sheet open onClose={onClose}>
-      <ExerciseArt name={exercise.name} equipment={exercise.equipment} />
+      <ExerciseImage
+        name={exercise.name}
+        muscle={exercise.muscle}
+        equipment={exercise.equipment}
+        imageStart={exercise.imageStart}
+        imageEnd={exercise.imageEnd}
+      />
 
       <div className={styles.detailMuscle}>{exercise.muscle}</div>
       <div className={styles.detailName}>{exercise.name}</div>

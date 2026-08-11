@@ -122,3 +122,12 @@ export const swapSchema = z.object({
   exercise: planExerciseSchema,
   reason: trimmed(400),
 });
+
+/**
+ * Maps a list of possibly-localized exercise names to their common English
+ * names, so they can be matched against the (English-only) demonstration
+ * library. One entry per input, in the same order.
+ */
+export const englishNamesSchema = z.object({
+  names: z.array(z.string().trim().max(80)).max(24),
+});

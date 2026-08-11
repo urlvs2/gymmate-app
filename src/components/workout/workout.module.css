@@ -380,6 +380,53 @@
   white-space: nowrap;
 }
 
+/* Exercise demonstration ------------------------------------------------- */
+
+.demo {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+/* Both photo frames stack in the same box; the top one cross-fades to animate
+   the rep. Object-fit keeps the figure framed whatever the source aspect is. */
+.demoFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
+}
+
+.demoFrameTop {
+  animation: demoStep 2.6s ease-in-out infinite;
+}
+
+@keyframes demoStep {
+  0%, 38% { opacity: 0; }
+  50%, 88% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demoFrameTop {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Fallback silhouette panel: a movement-pattern pose on a soft gradient. */
+.demoArt {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: linear-gradient(150deg, var(--raised), var(--surface2));
+}
+
 /* Detail sheet ------------------------------------------------------------ */
 
 .detailMuscle {

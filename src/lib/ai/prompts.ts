@@ -179,6 +179,25 @@ Reply with a JSON object only:
 }
 
 /**
+ * Turns a list of exercise names (in any language) into their common English
+ * names, purely so they can be looked up in an English demonstration library.
+ * This never reaches the user — it is a lookup key, not display text.
+ */
+export function englishNamesPrompt(count: number): string {
+  return `You convert exercise names into the standard English name used in gym exercise databases, so a photo of the movement can be found.
+
+You will be given a numbered list of exercises, each with the name, target muscle and equipment (possibly in Arabic). For each, output the single most common English name of that exact movement — for example the flat dumbbell chest press is "Dumbbell Bench Press", the Arabic "سكوات جوبلت" is "Goblet Squat", "رفرفة جانبية" is "Lateral Raise".
+
+Rules:
+- Use the everyday name a fitness app would use, not a literal word-for-word translation.
+- Keep the equipment in the name when it defines the movement ("Dumbbell", "Barbell", "Cable"), and keep "Bodyweight" only when there is no other equipment.
+- If an item is not really a resistance exercise (a walk, a stretch, a rest, general cardio), return an empty string for it.
+- Output exactly ${count} names, in the same order as the input.
+
+Reply with a JSON object only: {"names": string[]}`;
+}
+
+/**
  * Extra steer handed to the plan writer when a program is being replaced,
  * so the rebuild is visibly a response to what the person just said.
  */

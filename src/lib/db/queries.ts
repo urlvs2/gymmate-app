@@ -231,6 +231,25 @@ export async function savePlan(db: DB, userId: string, plan: Plan): Promise<Plan
   return rowToPlan(data as PlanRow)!;
 }
 
+/**
+ * Rewrites the schedule of an existing plan in place. Used to attach exercise
+ * images without minting a new plan or disturbing history — the plan is the
+ * same program, just with demonstrations filled in.
+ */
+export async function updatePlanSchedule(
+  db: DB,
+  userId: string,
+  planId: string,
+  schedule: Plan['schedule'],
+): Promise<void> {
+  const { error } = await db
+    .from('plans')
+    .update({ schedule })
+    .eq('id', planId)
+    .eq('user_id', userId);
+  if (error) throw new Error(error.message);
+}
+
 export async function loadChat(db: DB, userId: string, limit = 100): Promise<ChatMessage[]> {
   const { data } = await db
     .from('chat_messages')
