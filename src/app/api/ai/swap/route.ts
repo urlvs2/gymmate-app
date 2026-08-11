@@ -4,6 +4,7 @@ import { swapSystemPrompt } from '@/lib/ai/prompts';
 import { swapSchema } from '@/lib/ai/schemas';
 import { aiExerciseToExercise } from '@/lib/ai/mappers';
 import { attachImagesToExercises } from '@/lib/exercises/attach';
+import { equipmentPolicy } from '@/lib/domain/equipment';
 import { langSchema, resolveContext } from '@/lib/api/context';
 import { fail, handleError, ok } from '@/lib/api/http';
 
@@ -29,6 +30,21 @@ export async function POST(request: Request) {
     const body = bodySchema.parse(await request.json());
     const ctx = await resolveContext(body);
 
+    // The replacement must also stay within the equipment they have.
+    const policy = equipmentPolicy(ctx.profile.equipment);
+    const schema =
+      policy.level === 'any'
+        ? swapSchema
+        : swapSchema.superRefine((result, zctx) => {
+            const bad = policy.violation(result.exercise.name, result.exercise.equipment);
+            if (bad) {
+              zctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `The replacement "${result.exercise.name}" uses "${bad}", but this person can use ${policy.allowed}. Choose a replacement that needs only ${policy.allowed}.`,
+              });
+            }
+          });
+
     const result = await completeJson({
       system: swapSystemPrompt(
         {
@@ -41,7 +57,7 @@ export async function POST(request: Request) {
         body.reason?.trim() || null,
       ),
       messages: [{ role: 'user', content: `Replace ${body.exercise.name} for today.` }],
-      schema: swapSchema,
+      schema,
       maxTokens: 900,
     });
 

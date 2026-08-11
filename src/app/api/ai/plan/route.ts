@@ -3,6 +3,7 @@ import { completeJson } from '@/lib/ai/openrouter';
 import { planSystemPrompt, rebuildInstruction } from '@/lib/ai/prompts';
 import { planSchema } from '@/lib/ai/schemas';
 import { aiPlanToPlan } from '@/lib/ai/mappers';
+import { equipmentPolicy } from '@/lib/domain/equipment';
 import { langSchema, resolveContext } from '@/lib/api/context';
 import { fail, handleError, ok } from '@/lib/api/http';
 import { appendChat, savePlan, saveProfile } from '@/lib/db/queries';
@@ -29,6 +30,28 @@ export async function POST(request: Request) {
     const body = bodySchema.parse(await request.json());
     const ctx = await resolveContext(body);
 
+    // The equipment answer is an allow-list, enforced here rather than merely
+    // requested: a plan that uses gear the person does not have fails schema
+    // validation, and completeJson feeds the specifics back for one repair pass.
+    const policy = equipmentPolicy(ctx.profile.equipment);
+    const schema =
+      policy.level === 'any'
+        ? planSchema
+        : planSchema.superRefine((plan, zctx) => {
+            for (const day of plan.schedule) {
+              if (day.rest) continue;
+              for (const ex of day.exercises) {
+                const bad = policy.violation(ex.name, ex.equipment);
+                if (bad) {
+                  zctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Exercise "${ex.name}" uses "${bad}", but this person can use ${policy.allowed}. Replace it with an exercise that needs only ${policy.allowed}.`,
+                  });
+                }
+              }
+            }
+          });
+
     const aiPlan = await completeJson({
       system: planSystemPrompt(ctx.profile, ctx.lang),
       messages: [
@@ -41,7 +64,7 @@ export async function POST(request: Request) {
               : 'Build my program now.',
         },
       ],
-      schema: planSchema,
+      schema,
       kind: 'plan',
       maxTokens: 4500,
     });

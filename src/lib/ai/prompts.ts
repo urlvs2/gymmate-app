@@ -117,7 +117,7 @@ Rules that do matter:
 - Return all seven weekdays, 0 = Monday through 6 = Sunday, each exactly once and in order. Days they do not train are rest days with an empty exercise list and a focus word meaning rest.
 - The number of non-rest days must equal their stated days per week, and rest days should be spread sensibly rather than bunched at the end.
 - Every session must realistically fit their session length once you count sets and rest. Fewer, better exercises beat a list they cannot finish.
-- Only use exercises their equipment allows. If they train at home with dumbbells, do not put a cable machine in the plan.
+- EQUIPMENT IS A STRICT RULE, NOT A PREFERENCE. Their answer to what equipment they have is the complete list of what they can use — treat it as an allow-list. Every single exercise must be doable with only that equipment, and the "equipment" field of each exercise must name only something on their list (or bodyweight). If they said dumbbells only, every exercise uses a dumbbell or nothing but their body — no barbell, machine, cable, kettlebell or band anywhere. If they said bodyweight or no equipment, use only their own body (a wall, the floor, a sturdy chair or step are fine) and nothing that must be bought. If they have a full gym, anything goes. When a movement you would normally pick needs gear they do not have, replace it with one that trains the same thing using only what they have. Before you finish, re-read every exercise and remove any that would need equipment they did not list.
 - The less experience they have, the simpler and more stable the movements should be, and the more the cues matter.
 - "how_to" is 2 to 4 short cues in plain language, written for someone doing the movement for the first time. Say what to do, not anatomy.
 - Never include weights or loads anywhere. The app tracks what the person actually lifts and takes it from there.
@@ -168,7 +168,7 @@ Exercise to replace: ${ctx.exercise.name} (${ctx.exercise.muscle}, ${ctx.exercis
 ${reason ? `Why they want it swapped: ${reason}` : 'They did not say why — assume the equipment is busy or unavailable.'}
 ${describeProfile(profile)}
 
-Pick a replacement that trains the same thing, suits their equipment and experience, and keeps the session the same length. Do not repeat the exercise you are replacing. Adjust sets, reps and rest if the new movement needs it. Never mention weights — the app handles those from the person's own history.
+Pick a replacement that trains the same thing and keeps the session the same length. Their equipment is a strict rule: the replacement must be doable with only the equipment they listed above, and its "equipment" field must name only something they have (or bodyweight) — never suggest a machine, cable, barbell or anything else they did not say they have. Do not repeat the exercise you are replacing. Adjust sets, reps and rest if the new movement needs it. Never mention weights — the app handles those from the person's own history.
 
 "reason" is one or two sentences telling them what changed and why it still works.
 

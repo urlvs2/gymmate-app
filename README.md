@@ -93,6 +93,21 @@ That means the coach picks its own next question each turn (and skips anything
 it already knows), and a beginner with two days and a pair of dumbbells gets a
 genuinely different program from a lifter with six days in a full gym.
 
+### Equipment is a hard rule, not a hint
+
+Whatever the user says they have is the complete list of what a plan may use. The
+plan prompt states this as an allow-list and asks the model to re-read the plan
+and drop anything needing gear the person did not list, but a prompt alone is not
+a guarantee — so it is also enforced. `src/lib/domain/equipment.ts` reads the
+free-text answer (in either language) into a policy: a clearly restrictive answer
+like "just dumbbells at home" or "bodyweight only" produces a rule, while "basic
+gym" or "full gym" allows everything, because the person genuinely has it. The
+plan and swap routes fold that rule into the Zod schema, so a program that slips a
+cable machine into a dumbbell-only plan fails validation and `completeJson` feeds
+the offending exercises back for one repair pass. Detection is deliberately
+precise (word-boundary matching, English and Arabic) so it only ever rejects a
+real violation, never a valid plan.
+
 ### The coach can change the plan, not just talk about it
 
 One prompt covers the whole conversation — before a program exists it reads as
