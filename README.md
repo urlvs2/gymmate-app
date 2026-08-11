@@ -160,15 +160,15 @@ Two settings matter for how the app feels:
   mid-flow before returning to its own, and writes plans that reflect what the
   person said rather than a generic template.
 
-  There is a catch on a **free-tier key with no credits**: OpenRouter caps how
-  many tokens a single request may use by what your balance can afford. A short
-  chat turn (≈900 tokens) fits, so the conversation works; the whole-program
-  request (≈4500 tokens) does not, so `luna` returns `402` and the plan step
-  shows *"the AI ran out of credits"*. The fix is the fallback chain: cheaper
-  models follow `luna` that cost ~10× less per token — so the same balance buys
-  them the tokens the plan needs — and they build the plan in a handful of
-  seconds. Add a few dollars of credit at openrouter.ai and `luna` serves
-  everything itself (and you can promote the chain to `gpt-5.4` for richer plans).
+  With credit on the key `luna` serves both the conversation and the
+  whole-program request itself, in ~1–2 seconds. `qwen/qwen3.7-flash` sits behind
+  it as a safety net only: the chain tries `luna` first and reaches `qwen` solely
+  if `luna` actually fails, so it is never used while `luna` is working.
+
+  (Historical note: on a *free-tier key with no credits*, OpenRouter caps a
+  single request's tokens by what the balance can afford — a short chat turn
+  fits but the ≈4500-token plan request does not, so `luna` `402`s on the plan
+  step. The cheaper fallback is what kept plans working before credit was added.)
 - **Reasoning is switched off.** The coach's replies are short and structured,
   and reasoning made one model take 30 seconds instead of two. Models that
   refuse to have it disabled are retried with it left on.
