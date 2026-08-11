@@ -120,16 +120,22 @@ limit, and falls through the model list if one is down.
 
 Two settings matter for how the app feels:
 
+- **The model is OpenAI's GPT-5.6 (`openai/gpt-5.6-luna`),** driving both the
+  conversation and the program. It reads context well, answers questions mid-flow
+  before returning to its own, and writes plans that actually reflect what the
+  person said — a nervous beginner who mentions getting winded on stairs gets
+  warm-up walks and gentle regressions, not a generic template. It is the newest
+  OpenAI generation the current free-tier key can run end to end: the larger
+  flagships (`gpt-5.4` / `5.5` / `5.6-sol`) answer a short chat turn fine but
+  `402` once a whole program's worth of output is requested. Add credits at
+  openrouter.ai and you can promote both variables to `openai/gpt-5.4` for even
+  richer plans; the fallback in each chain is `openai/gpt-oss-120b:free`.
 - **Reasoning is switched off.** The coach's replies are short and structured,
-  and reasoning made one model take 30 seconds instead of 2.4. Models that
+  and reasoning made one model take 30 seconds instead of two. Models that
   refuse to have it disabled are retried with it left on.
-- **The models are cheap paid ones, not free ones.** The `:free` tiers rate
-  limit constantly and ignored the instruction to offer tap options. A whole
-  onboarding plus a generated program costs well under a cent. To go back to
-  free, set both model variables to `openai/gpt-oss-20b:free`.
 
-Measured on the current chain: each conversational turn 1.3–4s, program
-generation ~30s (it is a large JSON document, and the screen shows a
+Measured on the current chain: each conversational turn ~1–2s, program
+generation ~20–30s (it is a large JSON document, and the screen shows a
 "putting your program together" state while it runs).
 
 ### Weights are never guessed
